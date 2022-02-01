@@ -31,6 +31,9 @@ commands:
           type: string
         platform:
           type: string
+        test-args:
+          type: string
+          default: "-race -p 2"
       steps:
         - run:
             name: "Run go tests"
@@ -38,7 +41,7 @@ commands:
               PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
               echo "Running $(echo $PACKAGE_NAMES | wc -w) packages"
               echo $PACKAGE_NAMES
-              << parameters.cmd >> --format=short-verbose --junitfile $TEST_RESULTS_DIR/hcl2/gotestsum-report.xml -- -race -p 2 -cover -coverprofile=<< parameters.platform >>_cov_$CIRCLE_NODE_INDEX.part $PACKAGE_NAMES
+              << parameters.cmd >> --format=short-verbose --junitfile $TEST_RESULTS_DIR/hcl2/gotestsum-report.xml -- << parameters.test-args >> -cover -coverprofile=<< parameters.platform >>_cov_$CIRCLE_NODE_INDEX.part $PACKAGE_NAMES
 
 jobs:
   go-checks:
@@ -147,6 +150,7 @@ jobs:
       - run-gotests:
           cmd: "./gotestsum.exe"
           platform: "win"
+          test-args: "-p 2"
 
       # save coverage report parts
       - persist_to_workspace:
